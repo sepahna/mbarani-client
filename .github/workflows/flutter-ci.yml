@@ -1,0 +1,62 @@
+name: Flutter CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows:
+    name: Windows desktop
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Generate Windows runner
+        working-directory: apps/client
+        run: flutter create --platforms=windows --project-name=mbarani_client .
+      - name: Resolve dependencies
+        working-directory: apps/client
+        run: flutter pub get
+      - name: Analyze
+        working-directory: apps/client
+        run: flutter analyze
+      - name: Widget tests
+        working-directory: apps/client
+        run: flutter test
+      - name: Build Windows
+        working-directory: apps/client
+        run: flutter build windows --release
+
+  android:
+    name: Android
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Generate Android runner
+        working-directory: apps/client
+        run: flutter create --platforms=android --project-name=mbarani_client .
+      - name: Resolve dependencies
+        working-directory: apps/client
+        run: flutter pub get
+      - name: Analyze
+        working-directory: apps/client
+        run: flutter analyze
+      - name: Widget tests
+        working-directory: apps/client
+        run: flutter test
+      - name: Build Android APK
+        working-directory: apps/client
+        run: flutter build apk --release
